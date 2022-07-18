@@ -6,6 +6,7 @@ const {
 } = require('./db');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
@@ -19,6 +20,8 @@ app.post('/api/auth', async (req, res, next) => {
 
 app.get('/api/auth', async (req, res, next) => {
   try {
+    //const user = 
+    console.log("req.headers in /api/auth", req.headers)
     res.send(await User.byToken(req.headers.authorization));
   } catch (ex) {
     next(ex);
@@ -27,7 +30,14 @@ app.get('/api/auth', async (req, res, next) => {
 
 app.get('/api/users/:id/notes', async (req, res, next) => {
     try {
-        res.json(await User.findOne({include: {model: Note}}, {where: {id: req.params.id}}))
+        console.log("req.headers", req.headers)
+        //const user = await User.findOne({include: {model: Note}}, {where: {id: req.params.id}})
+        
+        const user = await User.byToken(req.headers.authorization)
+        //const match = await bcrypt.compare(`${user.id}`, req.params.id)
+        if (user) {
+            res.json(await User.findOne({include: {model: Note}}, {where: {id: req.params.id}}))
+        }
     } catch (ex) {
         next(ex)
     }
