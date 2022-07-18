@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const {
-  models: { User },
+  models: { User, Note },
 } = require('./db');
 const path = require('path');
 const jwt = require('jsonwebtoken');
@@ -24,6 +24,14 @@ app.get('/api/auth', async (req, res, next) => {
     next(ex);
   }
 });
+
+app.get('/api/users/:id/notes', async (req, res, next) => {
+    try {
+        res.json(await User.findOne({include: {model: Note}}, {where: {id: req.params.id}}))
+    } catch (ex) {
+        next(ex)
+    }
+})
 
 app.delete('/api/auth', async (req, res, next) => {
   try {
